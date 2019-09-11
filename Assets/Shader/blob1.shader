@@ -60,19 +60,11 @@ float scene(float3 position){
             position.z)
         )-0.8;
     
-    // This is different from the ground equation because the UV is only 
-    // between -1 and 1 we want more than 1/2pi of a wave per length of the 
-    // screen so we multiply the position by a factor of 10 inside the trig 
-    // functions. Since sin and cos oscillate between -1 and 1, that would be 
-    // the entire height of the screen so we divide by a factor of 10
-    float ground = position.y + sin(position.x * 10.) / 10. 
-                              + cos(position.z * 10.) / 10. + 1.;
     position.x /=2;
     position.y /=3;
     position.z/=_CosTime.g*30 + position.z/position.x;
     sphere += (sin(20*position.x)*sin(200*position.y * (_CosTime.r-1.5)*0.60*sin(2*position.z +((_SinTime.g-1.5)*0.2) )))*abs(tan(position.z /position.x));
-    // We want to return whichever one is closest to the ray, so we return the 
-    // minimum distance
+
     return sphere;
 }
 float shadow( in float3 ro, in float3 rd, float mint, float maxt, float k )

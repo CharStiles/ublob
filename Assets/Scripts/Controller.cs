@@ -9,18 +9,22 @@ public class Controller : MonoBehaviour
     int touches;
     float lastTouch;
     public float lastNext;
-
+    public DataController dc;
+    public float timeToLogOut;
     void Start()
     {
         Screen.sleepTimeout = SleepTimeout.NeverSleep;
         lastNext = 0f;
+        timeToLogOut = 120;
         lastTouch = 0f;
         touches = 0;
+       // dc = GameObject.FindWithTag("DataCont");
         //screens = GameObject.FindGameObjectsWithTag("Welcome");
     }
 
     public void LogOut(){
         Fade f;
+        
         for (int i = 0 ; i < screens.Length; i ++ ){
             
             f = screens[i].GetComponent<Fade>();
@@ -48,7 +52,7 @@ public class Controller : MonoBehaviour
             lastNext = Time.time;
         }
 
-        if(Time.time - lastNext > 4 && ( (screens[screens.Length - 1].GetComponent<Fade>().isFadedOut) == true )){
+        if(Time.time - lastNext > 4 && ( (screens[screens.Length - 1].GetComponent<Fade>().isFadedOut) == true ) && ( (screens[0].GetComponent<Fade>().isFadedOut) == false )  ){
             lastNext = Time.time;
             Fade f;
             for (int i = screens.Length-1 ; i >= 0 ; i --){
@@ -61,14 +65,9 @@ public class Controller : MonoBehaviour
             }
         }
       
-        if (Time.time - lastTouch > 120 && ( (screens[0].GetComponent<Fade>().isFadedOut) == false ) ){ // left the screen for 1 min
+        if (Mathf.Abs(Time.time - lastNext) > timeToLogOut){ // left the screen for 1 min
             lastTouch = Time.time;
             lastNext = Time.time;
-                //CanvasGroup cg1 = screens[0].GetComponent<CanvasGroup>();
-                //CanvasGroup cg2 = screens[screens.Length-1].GetComponent<CanvasGroup>();
-            //if (cg1.blocksRaycasts == false && cg2.blocksRaycasts == true){
-                LogOut();
-            //}
 
         }
         

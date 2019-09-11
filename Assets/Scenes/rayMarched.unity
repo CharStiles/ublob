@@ -1337,9 +1337,8 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: 'You are about to experiance uBlob,
-
-    which is quantafied blob companion based on your data. '
+  m_Text: You are about to experience uBlob, which is an Aura Companion that creates
+    you a custom blob friend based on your data.
 --- !u!222 &244361096
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -2311,7 +2310,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 391747379}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 1392445389, guid: f70555f144d8491a825f0804e09c671c, type: 3}
   m_Name: 
@@ -3165,7 +3164,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: Tap to read about uBlob symptoms
+  m_Text: Tap here to read about uBlob symptoms
 --- !u!222 &580558128
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -3663,8 +3662,8 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: We hope you enjoy uBlob and learn about how to better your data habits to
-    keep uBlob healthy.
+  m_Text: Your uBlob's health is based on the health of your data habits. We hope
+    you'll take care of your uBlob friend by taking care of your data.
 --- !u!222 &710178375
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -4221,11 +4220,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   welcomeButton: {fileID: 391747381}
-  blobs:
-  - {fileID: 1438634326}
-  - {fileID: 1415364895}
-  - {fileID: 2048910775}
-  - {fileID: 1676541727}
+  blob: {fileID: 1438634326}
 --- !u!4 &946853584
 Transform:
   m_ObjectHideFlags: 0
@@ -4997,6 +4992,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 31b119a3bc5044e4a886a503a87addf1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  screens:
+  - {fileID: 341853728}
+  - {fileID: 72658191}
+  - {fileID: 59179775}
+  - {fileID: 815074806}
+  - {fileID: 1041733211}
+  - {fileID: 391747379}
+  lastNext: 0
 --- !u!4 &1212820208
 Transform:
   m_ObjectHideFlags: 0
@@ -7681,7 +7684,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 830}
-  m_SizeDelta: {x: 161.15, y: 30}
+  m_SizeDelta: {x: 266.9, y: 53.4}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1928223791
 MonoBehaviour:

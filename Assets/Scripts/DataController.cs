@@ -26,12 +26,13 @@ public class DataController: MonoBehaviour
     Text name;
     GameObject nameGO;
     public Button welcomeButton;
-    public GameObject[] blobs;
+    public GameObject blob;
     public const string APIDomainWS = "wss://staging.projectamelia.ai/pusherman/companions/login/websocket?app=ublob";
      public const string APIDomain = "staging.projectamelia.ai";
      public const string APIUrl = "https://" + APIDomain;
+    string token;
      Renderer blobRend;
-    string usr;
+    public string usr;
      public static string SessionToken;
  
      public ClientWebSocket clientWebSocket;
@@ -40,7 +41,7 @@ public class DataController: MonoBehaviour
 
     IEnumerator bePatientSetupClient(){
 
-        yield return new WaitForSeconds(1);
+        yield return new WaitForSeconds(0.5f);
         SetupClient();
     }
 
@@ -57,7 +58,7 @@ public class DataController: MonoBehaviour
          {
              Uri uri = new Uri(APIDomainWS);
              await clientWebSocket.ConnectAsync(uri, CancellationToken.None);
-             if (clientWebSocket.State == WebSocketState.Open)
+             while (clientWebSocket.State == WebSocketState.Open)
              {
                 //  Debug.Log("Input message ('exit' to exit): ");
                  
@@ -77,7 +78,8 @@ public class DataController: MonoBehaviour
                  );
                  Debug.Log("ABOUT TO SEND TO RECIEVE");
                  ReceiveMessage(Encoding.UTF8.GetString(bytesReceived.Array, 0, result.Count));
-                 Debug.Log(Encoding.UTF8.GetString(bytesReceived.Array, 0, result.Count));
+                  //GetPosts();
+                 //Debug.Log(Encoding.UTF8.GetString(bytesReceived.Array, 0, result.Count));
              }
              Debug.Log("[WS][connect]:" + "Connected");
          }
@@ -94,6 +96,25 @@ public class DataController: MonoBehaviour
 
         StartCoroutine(bePatientSetupClient());
      }
+
+     public void GetPosts()
+     {
+        HttpClient client = new HttpClient();
+        // client.Post(new System.Uri("https://staging.projectamelia.ai/pusherman/ublob?"+cookie),HttpCompletionOption.AllResponseContent, (r) =>
+        // //client.Get(new System.Uri(cookieURL), HttpCompletionOption.AllResponseContent, (r) =>
+        // {
+        //     Debug.Log(r.ReadAsString());
+        // });
+
+
+        //client.Get(new System.Uri("https://staging.projectamelia.ai/pusherman/ublob?username=charlottefstiles@gmail.com&passphrase=Pup_a_pie5"), HttpCompletionOption.AllResponseContent, (r) =>
+        client.Get(new System.Uri("https://staging.projectamelia.ai/pusherman/mood_companion?token="+token), HttpCompletionOption.AllResponseContent, (r) =>
+        //client.Get(new System.Uri(cookieURL), HttpCompletionOption.AllResponseContent, (r) =>
+        {
+            Debug.Log(r.ReadAsString());
+        });
+     }
+
  void Start()
  {
      GameObject go = GameObject.FindWithTag("GameController");
@@ -105,7 +126,9 @@ public class DataController: MonoBehaviour
     url = "";
     usr = "";
     oldUrl = "";
+    token = "";
     lastTimeReceive = 0f;
+    blobRend = blob.GetComponent<Renderer>(); 
  }
 
  void Quit(){
@@ -143,7 +166,11 @@ public class DataController: MonoBehaviour
         if (nameGO.activeSelf == false){
             nameGO.SetActive(true);
         }
-        
+        if (Mathf.Abs(Time.time - controller.lastNext) > controller.timeToLogOut){ // left the screen for 1 min
+            usr = "";
+            controller.LogOut();
+
+        }
     }
     	// Event when the connection has been opened
 	void OnWebSocketUnityOpen(string sender){}
@@ -164,55 +191,67 @@ public class DataController: MonoBehaviour
     //     Debug.Log("closed!!");
     // }
 
-	void callGetPic(){
-        //url = "https://scontent.cdninstagram.com/vp/40eca769e5c52d4d93f81d005e6f312f/5DCAF45F/t51.2885-19/s150x150/53745151_2080173922098515_549575747384115200_n.jpg?_nc_ht=scontent.cdninstagram.com";
-        url = "http://pbs.twimg.com/profile_images/824493306553991172/VCY4N-tr_normal.jpg";
-        StartCoroutine(getPic());
-    }
 
 
 	public void ReceiveMessage(string message){
         
         Debug.Log("Received this from server : " + message);
-        welcomeButton.onClick.Invoke();
-        //string[] stringSeparators = new string[] {'\"'};
-        //callGetPic();
+        if (Time.time - lastTimeReceive > 1){
+            controller.LogOut();
+        }
+        
         controller.lastNext = Time.time;
         string[] result = message.Split('\"');
         bool gotName = false;
         bool gotUesrName = false;
-        for (int i = 0 ; i < blobs.Length ; i++){
 
-                blobs[i].SetActive(false);
-            
-        }
         for (int i = 0 ; i < result.Length; i ++){
             if (result[i] == "first_name" && gotName == false){
                 Debug.Log("GOT NAME");
                 gotName = true;
                 name.text = "Hello " + result[i+2];
-                GameObject b = blobs[ (result[i+2].Length ) % blobs.Length ];
-                b.SetActive(true);
-                blobRend = b.GetComponent<Renderer>();  
+                // GameObject b = blobs[ (result[i+2].Length ) % blobs.Length ];
+                // b.SetActive(true);
+                //blobRend = b.GetComponent<Renderer>();  
+                blobRend.material.SetFloat("_Speed", ((((float)(result[i+2].Length))/10.0f) % 1.0f) + 0.001f);
+
             }
-            if (result[i] == "username" && gotUesrName == false && (Time.time - lastTimeReceive > 5)){
+            if (result[i] == "username" && gotUesrName == false && (Time.time - lastTimeReceive > 2)){
                 gotUesrName = true;
- 
+                blobRend.material.SetFloat("_Size", (((float)(result[i+2].Length))/12.0f) % 1.0f);
+
                 if (usr == result[i+2])
                 {
-                    controller.LogOut();
+                    url = "";
+                    usr = "";
+                    oldUrl = "";
+                    token = "";
                     Debug.Log("loggin out");
                 }
+                else{
+                    welcomeButton.onClick.Invoke();
+                    usr = result[i+2];
+                }
 
-                usr = result[i+2];
+                
             }
 
             if (result[i] == "picture"){
             
                 url = result[i+2];
+                blobRend.material.SetFloat("_Pale", (((float)(result[i+2].Length))/24.0f) % 1.0f);
+                blobRend.material.SetFloat("_Yellow", (((float)(result[i+2].Length))/33.0f) % 1.0f);
+
+            }
+            if (result[i] == "token"){
+            
+                token = result[i+2];
+
            
             }
         }
+
+    
     lastTimeReceive = Time.time;
 
     }

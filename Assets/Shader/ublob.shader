@@ -4,8 +4,11 @@
     {
         _Color ("Color", Color) = (1,1,1,1)
         _MainTex ("Albedo (RGB)", 2D) = "white" {}
-        _Glossiness ("Smoothness", Range(0,1)) = 0.5
-        _Metallic ("Metallic", Range(0,1)) = 0.0
+        _AltTex ("altTex", 2D) = "white" {}
+        _Speed ("Speed", Range(0,1)) = 0.5
+        _Pale ("Pale", Range(0,1)) = 0.0
+        _Yellow ("Yellow", Range(0,1)) = 0.0
+        _Size("Size", Range(0,1)) = 0.0
     }
 	SubShader {
 		Tags
@@ -37,8 +40,10 @@
             float2 Position:TEXCOORD0;
         };
 
-        half _Glossiness;
-        half _Metallic;
+        half _Yellow;
+        half _Size;
+        half _Pale;
+        half _Speed;
         fixed4 _Color;
         fixed4 picCol;
 
@@ -51,7 +56,7 @@
 
  
 float scene(float3 position){
-    float3 c = float3(10.0,50.0,10.0);
+    float3 c = float3(10.0,50.0,20.0);
     position = (position % c) + c*float3(0.5,0.5,0.5);
     position.y -= 4.0;
     float sphere = length(
@@ -60,18 +65,27 @@ float scene(float3 position){
             position.y, 
             position.z)
         )-1.8;
-    
-    // This is different from the ground equation because the UV is only 
-    // between -1 and 1 we want more than 1/2pi of a wave per length of the 
-    // screen so we multiply the position by a factor of 10 inside the trig 
-    // functions. Since sin and cos oscillate between -1 and 1, that would be 
-    // the entire height of the screen so we divide by a factor of 10
-    float ground = position.y + sin(position.x * 10.) / 10. 
-                              + cos(position.z * 10.) / 10. + 1.;
     position /=2;
-    sphere += (sin(10*position.x)*sin(10*position.y * (_CosTime.r-1.5)*0.6*sin(position.z +((_SinTime.g-1.5)*0.2) )))*0.1;
-    // We want to return whichever one is closest to the ray, so we return the 
-    // minimum distance
+    sphere += (sin(10*position.x)*sin(10*position.y * ((_CosTime.r* (_Speed*2.))-1.5)*0.6*sin(position.z +(((_SinTime.g* (_Speed*2.))-1.5)*0.2) )))*0.1;
+
+    return sphere;
+}
+float scene_loose(float3 position){
+    float3 c = float3(10.0,50.0,10.0);
+    position = (position % c) + c*float3(0.5,0.5,0.5);
+    position.y -= 4.0;
+    float sphere = length(
+        float3(
+            position.x , 
+            position.y, 
+            position.z)
+        )-0.8;
+    
+    position.x /=2;
+    position.y /=3;
+    position.z/=(_CosTime.g * (_Speed*2.))*30 + position.z/position.x;
+    sphere += (sin(20*position.x)*sin(200*position.y * ((_CosTime.r* (_Speed*2.)) -1.5)*0.60*sin(2*position.z +(((_SinTime.g* (_Speed*2.))-1.5)*0.2) )))*abs(tan(position.z /position.x));
+
     return sphere;
 }
 
@@ -140,14 +154,20 @@ fixed3 phongContribForLight(fixed3 k_d, fixed3 k_s, float alpha, fixed3 p, fixed
 float4 trace (float3 origin, float3 direction){
     const int steps = 16;
     const float smallNumber = 0.001;
-    const float maxDist = 30.;
+    const float maxDist = 20.;
     float dist = 0.;
     float totalDistance = 0.;
     float3 positionOnRay = origin;
     
     for(int i = 0 ; i < steps; i++){
         
-        dist = scene(positionOnRay);
+        if(_Size < 0.5){
+            dist = scene_loose(positionOnRay);
+        }
+        else{
+
+            dist = scene(positionOnRay);
+        }
         
         // advance along the ray trajectory the amount that we know the ray
         // can travel without going through an object
@@ -162,13 +182,15 @@ float4 trace (float3 origin, float3 direction){
             // return the distance the ray had to travel normalized so be white
             // at the front and black in the back 
             float a = clamp(1. - (totalDistance / maxDist),0,0.75) * 1.4;
-            fixed3 K_a = fixed3((dist * 10000) +0.5,(dist * 10000)+0.5, (dist * 10055) +0.5); //  _LightColor0.rgb;// //ambient
+            fixed3 K_a = fixed3((dist * 10000) *(_Yellow),(dist * 10000)*_Yellow, (dist * 10055) +0.5); //  _LightColor0.rgb;// //ambient
 		    fixed3 K_d = fixed3(11.54, 0.45, 0.55); // directiona
 		    fixed3 K_s = fixed3(1., 0.4, 1.);
 		    float shininess = 1.0;
 		    fixed3 color = phongIllumination(K_a, K_d, K_s, shininess, positionOnRay, origin, _Time.z * 6) ;
             fixed4 colFromPic = float4(tex2D (_MainTex, positionOnRay.xy).rgb,a);
-            return lerp(colFromPic, float4(color.r,color.g,color.b,a),  clamp(color.r,0,1) );
+            fixed4 retCol = lerp(colFromPic, float4(color.r,color.g,color.b,a),  clamp(color.r,0,1) );
+            retCol = pow(retCol, (1 - (max(_Pale * 0.7, 0.2))));
+            return retCol;
  
         }
         if (totalDistance > maxDist){
