@@ -66,7 +66,7 @@ float scene(float3 position){
             position.z)
         )-1.8;
     position /=2;
-    sphere += (sin(10*position.x)*sin(10*position.y * ((_CosTime.r* (_Speed*2.))-1.5)*0.6*sin(position.z +(((_SinTime.g* (_Speed*2.))-1.5)*0.2) )))*0.1;
+    sphere += (sin(10*position.x)*sin(10*position.y * ((_CosTime.r* (_Speed*3.))-1.5)*0.6*sin(position.z +(((_SinTime.g* (_Speed*2.))-1.5)*0.2) )))*0.1;
 
     return sphere;
 }
@@ -84,7 +84,7 @@ float scene_loose(float3 position){
     position.x /=2;
     position.y /=3;
     position.z/=(_CosTime.g * (_Speed*2.))*30 + position.z/position.x;
-    sphere += (sin(20*position.x)*sin(200*position.y * ((_CosTime.r* (_Speed*2.)) -1.5)*0.60*sin(2*position.z +(((_SinTime.g* (_Speed*2.))-1.5)*0.2) )))*abs(tan(position.z /position.x));
+    sphere += (sin(20*position.x)*sin(200*position.y * ((_CosTime.r* (_Speed*3.)) -1.5)*0.60*sin(2*position.z +(((_SinTime.g* (_Speed*2.))-1.5)*0.2) )))*abs(tan(position.z /position.x));
 
     return sphere;
 }
@@ -186,10 +186,11 @@ float4 trace (float3 origin, float3 direction){
 		    fixed3 K_d = fixed3(11.54, 0.45, 0.55); // directiona
 		    fixed3 K_s = fixed3(1., 0.4, 1.);
 		    float shininess = 1.0;
-		    fixed3 color = phongIllumination(K_a, K_d, K_s, shininess, positionOnRay, origin, _Time.z * 6) ;
+		    fixed3 color = phongIllumination(K_a, K_d, K_s, shininess, positionOnRay, origin, (_Time.z * (6* _Speed) )) ;
             fixed4 colFromPic = float4(tex2D (_MainTex, positionOnRay.xy).rgb,a);
             fixed4 retCol = lerp(colFromPic, float4(color.r,color.g,color.b,a),  clamp(color.r,0,1) );
             retCol = pow(retCol, (1 - (max(_Pale * 0.7, 0.2))));
+            
             return retCol;
  
         }

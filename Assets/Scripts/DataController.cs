@@ -14,7 +14,8 @@ using UnityEngine.Networking;
 using UnityEngine.UI;
 using System.Threading;
 using System.Threading.Tasks; 
-
+using TMPro; // Add the TextMesh Pro namespace to access the various functions.
+ 
 //part of this code is from https://answers.unity.com/questions/1475622/systemnetwebsocketsclientwebsocket-fails-at-connec.html
 // https://fogbugz.unity3d.com/default.asp?1082184_b1jgq2gplqp9fnja
 
@@ -30,14 +31,26 @@ public class DataController: MonoBehaviour
     public const string APIDomainWS = "wss://staging.projectamelia.ai/pusherman/companions/login/websocket?app=ublob";
      public const string APIDomain = "staging.projectamelia.ai";
      public const string APIUrl = "https://" + APIDomain;
+    
+    public TextMeshProUGUI diagnosisText;
+    //Text diagnosisText;
+    string diagnosisString = "\n</size=85%>\n<size=75%>If you haven't connected your social media accounts to Aura, this also could be the problem.\n\n*none of these statements have been evaluated by the SMA. This app is not intended to diagnose, treat, cure, or prevent any disease.”</size=75%>\n\n\n\n\n\n\n\n\n\n\n\n\n";
+    string magenta = "\n\n</size=75%><size=85%>Magenta uBlob</size=85%>\n<size=75%>Having a magenta or pink uBlob may mean you haven\'t been consuming enough popular/verified content. This is easily solved by following a few verified accounts with more than 500k followers.</size=75%><size=75%>It also may simply mean you have been posting a lot of magenta pictures or interacting with magenta content.</size=75%><size=75%>";
+    string slow = "\n\n</size=75%><size=85%>Loose, slow movements, or no movement</size=85%>\n<size=75%>Your uBlob shouldn't be still, this indicates some underlying stress that you may have towards your social media feed. This can be tough to figure out what is causing the source, try unfollowing people who make you angry or post negative content. Slow movement can be solved, but if your uBlob is completely still please mention it to a certified uBlob therapist. </size=75%><size=75%>";
+    string small = "\n\n</size=75%><size=85%>Whispy-like uBlob</size=85%>\n<size=75%>You have been consuming or participating in microblogging too much, try adding some lengthier content to your social media consumption. Try spending more time reading email or reading your friends long Facebook post instead of Instagram or Twitter.</size=75%><size=75%>";
+    string pale = "\n\n</size=75%><size=85%>Pale uBlob</size=85%>\n<size=75%>Watching videos or looking at images taken of real life gives uBlob its characteristic textured and colorful look, a uBlob that is light-colored (either pale, white, grey, or clay-colored) could indicate a lack of colorful images in your social media browsing, This is common for those who look at too many similar memes, text based content, or those pictures of text. </size=75%><size=75%>";
+    string beginning = "<size=100%>My uBlob Diagnosis*:</size=100%><size=75%>\n";
     string token;
      Renderer blobRend;
-    public string usr;
+    string usr;
      public static string SessionToken;
  
      public ClientWebSocket clientWebSocket;
      Controller controller;
      float lastTimeReceive;
+     float paleToShader ;
+                float yellowToShader;
+    public Texture2D defaultTexture;
 
     IEnumerator bePatientSetupClient(){
 
@@ -138,7 +151,7 @@ public class DataController: MonoBehaviour
  }
  
  
-    IEnumerator getPic()
+    IEnumerator getPic(bool tryAgain = true)
     {
         using (UnityWebRequest uwr = UnityWebRequestTexture.GetTexture(url))
         {
@@ -146,6 +159,10 @@ public class DataController: MonoBehaviour
 
             if (uwr.isNetworkError || uwr.isHttpError)
             {
+                if (tryAgain){
+                    url = url + "?token="+token;
+                    yield return (getPic(false));
+                }
                 Debug.Log(uwr.error);
             }
             else
@@ -198,8 +215,12 @@ public class DataController: MonoBehaviour
         Debug.Log("Received this from server : " + message);
         if (Time.time - lastTimeReceive > 1){
             controller.LogOut();
+            blobRend.material.mainTexture = defaultTexture;
         }
-        
+
+        diagnosisString = "\n</size=85%>\n<size=75%>If you haven't connected your social media accounts to Aura, this also could be the problem.\n\n*none of these statements have been evaluated by the SMA. This app is not intended to diagnose, treat, cure, or prevent any disease.”</size=75%>\n\n\n\n\n\n\n\n\n\n\n\n\n";
+        string startDiagnosisString = "\n</size=85%>\n<size=75%>If you haven't connected your social media accounts to Aura, this also could be the problem.\n\n*none of these statements have been evaluated by the SMA. This app is not intended to diagnose, treat, cure, or prevent any disease.”</size=75%>\n\n\n\n\n\n\n\n\n\n\n\n\n";
+
         controller.lastNext = Time.time;
         string[] result = message.Split('\"');
         bool gotName = false;
@@ -213,12 +234,41 @@ public class DataController: MonoBehaviour
                 // GameObject b = blobs[ (result[i+2].Length ) % blobs.Length ];
                 // b.SetActive(true);
                 //blobRend = b.GetComponent<Renderer>();  
-                blobRend.material.SetFloat("_Speed", ((((float)(result[i+2].Length))/10.0f) % 1.0f) + 0.001f);
-
+                float speedToShader = ((((float)(message.Length))/3500.0f));
+                if (((((float)(message.Length))/3000.0f)) < 0.1){
+                    speedToShader = 0;
+                }
+                blobRend.material.SetFloat("_Speed", speedToShader);
+                if (speedToShader < 0.4){
+                    diagnosisString = slow+diagnosisString;
+                    
+                }
             }
             if (result[i] == "username" && gotUesrName == false && (Time.time - lastTimeReceive > 2)){
                 gotUesrName = true;
-                blobRend.material.SetFloat("_Size", (((float)(result[i+2].Length))/12.0f) % 1.0f);
+                float sizeToShader = (((float)(result[i+2].Length))/13.0f) % 1.0f;
+                blobRend.material.SetFloat("_Size", sizeToShader);
+                
+                if (sizeToShader < 0.5f){
+                    diagnosisString = small+diagnosisString;
+                }
+                paleToShader = (((float)(result[i+2].Length))/23.111f) % 1.0f;
+                yellowToShader = (((float)(result[i+2].Length))/3.1415f) % 1.0f;
+
+               
+                if (((((float)(message.Length))/3000.0f)) < 0.2){
+                    yellowToShader = 0;
+                    paleToShader = 1;
+                }
+
+                blobRend.material.SetFloat("_Pale", paleToShader);
+                blobRend.material.SetFloat("_Yellow", yellowToShader);
+                if (paleToShader > 0.5f){
+                    diagnosisString = pale+diagnosisString;
+                }
+                if (yellowToShader < 0.5f){
+                    diagnosisString = magenta+diagnosisString;
+                }
 
                 if (usr == result[i+2])
                 {
@@ -233,26 +283,30 @@ public class DataController: MonoBehaviour
                     usr = result[i+2];
                 }
 
-                
             }
 
             if (result[i] == "picture"){
             
                 url = result[i+2];
-                blobRend.material.SetFloat("_Pale", (((float)(result[i+2].Length))/24.0f) % 1.0f);
-                blobRend.material.SetFloat("_Yellow", (((float)(result[i+2].Length))/33.0f) % 1.0f);
+
 
             }
             if (result[i] == "token"){
             
                 token = result[i+2];
+                
 
-           
             }
+
+
         }
 
-    
+    if(diagnosisString == startDiagnosisString){
+        blobRend.material.SetFloat("_Speed", 0.2f);
+        diagnosisString = slow+diagnosisString;
+    }
     lastTimeReceive = Time.time;
+    diagnosisText.SetText(beginning + diagnosisString);
 
     }
 	

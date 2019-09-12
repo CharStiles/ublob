@@ -10,7 +10,10 @@ public class Controller : MonoBehaviour
     float lastTouch;
     public float lastNext;
     public DataController dc;
-    public float timeToLogOut;
+    public AudioSource mainAudio;
+    public AudioSource loadingAudio;
+    public float timeToLogOut= 120;
+    float timeToWaitBetween;
     void Start()
     {
         Screen.sleepTimeout = SleepTimeout.NeverSleep;
@@ -18,13 +21,14 @@ public class Controller : MonoBehaviour
         timeToLogOut = 120;
         lastTouch = 0f;
         touches = 0;
+        timeToWaitBetween = 2;
        // dc = GameObject.FindWithTag("DataCont");
         //screens = GameObject.FindGameObjectsWithTag("Welcome");
     }
 
     public void LogOut(){
         Fade f;
-        
+        timeToWaitBetween = 2;
         for (int i = 0 ; i < screens.Length; i ++ ){
             
             f = screens[i].GetComponent<Fade>();
@@ -34,7 +38,20 @@ public class Controller : MonoBehaviour
         }
 
     }
-
+    IEnumerator fadeOutAudio(AudioSource a){
+        while(a.volume > 0f ){
+            a.volume -= 0.1f;
+            yield return null;
+        }
+        a.Stop();
+    }
+    IEnumerator fadeInAudio(AudioSource a){
+        a.Play();
+        while(a.volume < 1f ){
+            a.volume += 0.1f;
+            yield return null;
+        }
+    }
     // Update is called once per frame
     void Update()
     {
@@ -52,14 +69,26 @@ public class Controller : MonoBehaviour
             lastNext = Time.time;
         }
 
-        if(Time.time - lastNext > 4 && ( (screens[screens.Length - 1].GetComponent<Fade>().isFadedOut) == true ) && ( (screens[0].GetComponent<Fade>().isFadedOut) == false )  ){
+        if(Time.time - lastNext > timeToWaitBetween && ( (screens[screens.Length - 1].GetComponent<Fade>().isFadedOut) == true ) && ( (screens[0].GetComponent<Fade>().isFadedOut) == false )  ){
             lastNext = Time.time;
             Fade f;
             for (int i = screens.Length-1 ; i >= 0 ; i --){
-           
+                if (i < screens.Length -1){
+                    timeToWaitBetween = 5;
+                }
                 f = screens[i].GetComponent<Fade>();
                 if (f.isFadedOut == false){
                     f.FadeOut();
+                    if (i == 2){
+                        StartCoroutine(fadeOutAudio(mainAudio));
+                        StartCoroutine(fadeInAudio(loadingAudio));
+                        timeToWaitBetween = 6;
+                    }
+                    if (i == 1){
+                        StartCoroutine(fadeInAudio(mainAudio));
+                        StartCoroutine(fadeOutAudio(loadingAudio));
+                        timeToWaitBetween = 2;
+                    }
                     break;
                 }
             }
