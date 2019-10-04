@@ -7,7 +7,7 @@ public class Fade : MonoBehaviour
     // Start is called before the first frame update
     CanvasGroup cg;
     public bool isFadedOut;
-    bool beingUsed = false;
+    public bool beingUsed = false;
 
     void Start()
     {

@@ -30,7 +30,7 @@
 		#pragma glsl
         sampler2D _MainTex;
 
-        #define MAX_DIST  100.0
+        #define MAX_DIST  50.0
         #define EPSILON  0.0001
         struct Input
         {
@@ -152,8 +152,8 @@ fixed3 phongContribForLight(fixed3 k_d, fixed3 k_s, float alpha, fixed3 p, fixed
 		}
 
 float4 trace (float3 origin, float3 direction){
-    const int steps = 16;
-    const float smallNumber = 0.001;
+    const int steps = 8;
+    const float smallNumber = 0.01;
     const float maxDist = 20.;
     float dist = 0.;
     float totalDistance = 0.;

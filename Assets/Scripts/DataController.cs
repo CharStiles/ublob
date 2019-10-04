@@ -14,6 +14,7 @@ using UnityEngine.Networking;
 using UnityEngine.UI;
 using System.Threading;
 using System.Threading.Tasks; 
+//using UnityEngine.SceneManagement;
 using TMPro; // Add the TextMesh Pro namespace to access the various functions.
  
 //part of this code is from https://answers.unity.com/questions/1475622/systemnetwebsocketsclientwebsocket-fails-at-connec.html
@@ -21,15 +22,20 @@ using TMPro; // Add the TextMesh Pro namespace to access the various functions.
 
 public class DataController: MonoBehaviour
 {
-
     string url;
     string oldUrl;
     Text name;
     GameObject nameGO;
     public Button welcomeButton;
     public GameObject blob;
-    public const string APIDomainWS = "wss://staging.projectamelia.ai/pusherman/companions/login/websocket?app=ublob";
-     public const string APIDomain = "staging.projectamelia.ai";
+    public RectTransform symptomPos;
+    
+    // also in getpost
+    public const string APIDomainWS = "wss://projectamelia.ai/pusherman/companions/login/websocket?app=ublob";
+    //public const string APIDomainWS = "wss://staging.projectamelia.ai/pusherman/companions/login/websocket?app=ublob";
+
+     public const string APIDomain = "projectamelia.ai";
+     //public const string APIDomain = "staging.projectamelia.ai";
      public const string APIUrl = "https://" + APIDomain;
     
     public TextMeshProUGUI diagnosisText;
@@ -121,7 +127,7 @@ public class DataController: MonoBehaviour
 
 
         //client.Get(new System.Uri("https://staging.projectamelia.ai/pusherman/ublob?username=charlottefstiles@gmail.com&passphrase=Pup_a_pie5"), HttpCompletionOption.AllResponseContent, (r) =>
-        client.Get(new System.Uri("https://staging.projectamelia.ai/pusherman/mood_companion?token="+token), HttpCompletionOption.AllResponseContent, (r) =>
+        client.Get(new System.Uri("https://projectamelia.ai/pusherman/mood_companion?token="+token), HttpCompletionOption.AllResponseContent, (r) =>
         //client.Get(new System.Uri(cookieURL), HttpCompletionOption.AllResponseContent, (r) =>
         {
             Debug.Log(r.ReadAsString());
@@ -217,9 +223,10 @@ public class DataController: MonoBehaviour
             controller.LogOut();
             blobRend.material.mainTexture = defaultTexture;
         }
+        symptomPos.localPosition = new Vector3(0f,-461f,0f);
 
         diagnosisString = "\n</size=85%>\n<size=75%>If you haven't connected your social media accounts to Aura, this also could be the problem.\n\n*none of these statements have been evaluated by the SMA. This app is not intended to diagnose, treat, cure, or prevent any disease.”</size=75%>\n\n\n\n\n\n\n\n\n\n\n\n\n";
-        string startDiagnosisString = "\n</size=85%>\n<size=75%>If you haven't connected your social media accounts to Aura, this also could be the problem.\n\n*none of these statements have been evaluated by the SMA. This app is not intended to diagnose, treat, cure, or prevent any disease.”</size=75%>\n\n\n\n\n\n\n\n\n\n\n\n\n";
+        string startDiagnosisString = diagnosisString;
 
         controller.lastNext = Time.time;
         string[] result = message.Split('\"');
@@ -276,6 +283,7 @@ public class DataController: MonoBehaviour
                     usr = "";
                     oldUrl = "";
                     token = "";
+                    //SceneManager.LoadScene("rayMarched");
                     Debug.Log("loggin out");
                 }
                 else{
@@ -307,9 +315,8 @@ public class DataController: MonoBehaviour
     }
     lastTimeReceive = Time.time;
     diagnosisText.SetText(beginning + diagnosisString);
-
     }
-	
+    
 	// Event when the websocket receive data
 	public void OnWebSocketUnityReceiveData(byte[] data){
 

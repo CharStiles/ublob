@@ -12,8 +12,9 @@ public class Controller : MonoBehaviour
     public DataController dc;
     public AudioSource mainAudio;
     public AudioSource loadingAudio;
-    public float timeToLogOut= 120;
+    public float timeToLogOut= 80;
     float timeToWaitBetween;
+
     void Start()
     {
         Screen.sleepTimeout = SleepTimeout.NeverSleep;
@@ -87,7 +88,7 @@ public class Controller : MonoBehaviour
                     if (i == 1){
                         StartCoroutine(fadeInAudio(mainAudio));
                         StartCoroutine(fadeOutAudio(loadingAudio));
-                        timeToWaitBetween = 2;
+                        timeToWaitBetween = 4;
                     }
                     break;
                 }
