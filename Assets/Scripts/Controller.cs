@@ -4,7 +4,6 @@ using UnityEngine;
 
 public class Controller : MonoBehaviour
 {
-    // Start is called before the first frame update
     public GameObject[] screens;
     int touches;
     float lastTouch;
@@ -12,19 +11,18 @@ public class Controller : MonoBehaviour
     public DataController dc;
     public AudioSource mainAudio;
     public AudioSource loadingAudio;
-    public float timeToLogOut= 80;
+    public float timeToLogOut= 80;// this is in seconds
     float timeToWaitBetween;
 
     void Start()
     {
         Screen.sleepTimeout = SleepTimeout.NeverSleep;
         lastNext = 0f;
-        timeToLogOut = 120;
+        timeToLogOut = 120; 
         lastTouch = 0f;
         touches = 0;
         timeToWaitBetween = 2;
-       // dc = GameObject.FindWithTag("DataCont");
-        //screens = GameObject.FindGameObjectsWithTag("Welcome");
+
     }
 
     public void LogOut(){

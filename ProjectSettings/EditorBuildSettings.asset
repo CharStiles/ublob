@@ -6,10 +6,10 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 0
-    path: Assets/Scenes/Main.unity
+    path: Assets/Scenes/MainBackup.unity
     guid: ddbd1473aad844a59b2fdca5619f9a9e
   - enabled: 1
-    path: Assets/Scenes/rayMarched.unity
+    path: Assets/Scenes/Main.unity
     guid: 26f2986b877d24490a13013c847ded2a
   - enabled: 0
     path: Assets/Demo/TestWebSocket.unity
